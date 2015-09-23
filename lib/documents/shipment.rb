@@ -18,22 +18,57 @@ module Documents
             xml.ExternalID("#{@shipment['id']}")
             xml.AdCode(@shipment['adcode'] || @config['adcode'])
             xml.Prepaid('Y')
-            xml.ShipFirstname truncate_name
-            xml.ShipLastname(@shipment['shipping_address']['lastname'])
-            xml.ShipAddress1(@shipment['shipping_address']['address1'])
-            xml.ShipAddress2(@shipment['shipping_address']['address2'])
-            xml.ShipCity(truncate_city)
+            xml.ShipFirstname(truncate_name( @shipment['shipping_address']['firstname']) )
+            xml.ShipLastname(truncate_name( @shipment['shipping_address']['lastname']) )
+
+            if (@shipment['shipping_address']['company'].present?)
+              xml.ShipAddress1( truncate_address(@shipment['shipping_address']['company']) )
+              xml.ShipAddress2( truncate_address(@shipment['shipping_address']['address1']) )
+              xml.ShipAddress3( truncate_address(@shipment['shipping_address']['address2']) )
+            else
+              xml.ShipAddress1(truncate_address(@shipment['shipping_address']['address1']))
+              xml.ShipAddress2(truncate_address(@shipment['shipping_address']['address2']))
+            end
+
+            xml.ShipCity( truncate_city(@shipment['shipping_address']['city']) )
 
             # Use "ShipStateOther" field for international orders
-            if (@shipment['shipping_address']['country'] != 'US') 
-              xml.ShipStateOther(ship_state)
+            if (@shipment['shipping_address']['country'] != 'US')
+              xml.ShipStateOther( ship_state(@shipment['shipping_address']['state']) )
             else
-              xml.ShipState(ship_state)
+              xml.ShipState( ship_state(@shipment['shipping_address']['state']) )
             end
 
             xml.ShipZip(@shipment['shipping_address']['zipcode'])
             xml.ShipCountry(@shipment['shipping_address']['country'])
             xml.ShipPhone(@shipment['shipping_address']['phone'])
+
+            xml.BillFirstname(truncate_name( @shipment['billing_address']['firstname']) )
+            xml.BillLastname(truncate_name( @shipment['billing_address']['lastname']) )
+
+            if (@shipment['billing_address']['company'].present?)
+              xml.BillAddress1( truncate_address(@shipment['billing_address']['company']) )
+              xml.BillAddress2( truncate_address(@shipment['billing_address']['address1']) )
+              xml.BillAddress3( truncate_address(@shipment['billing_address']['address2']) )
+            else
+              xml.BillAddress1( truncate_address(@shipment['billing_address']['address1']) )
+              xml.BillAddress2( truncate_address(@shipment['billing_address']['address2']) )
+            end
+
+            xml.BillCity( truncate_city(@shipment['billing_address']['city']) )
+
+            # Use "BillStateOther" field for international orders
+            if (@shipment['billing_address']['country'] != 'US')
+              xml.BillStateOther( ship_state(@shipment['billing_address']['state'] ))
+            else
+              xml.BillState( ship_state(@shipment['billing_address']['state']) )
+            end
+
+            xml.BillZip(@shipment['billing_address']['zipcode'])
+            xml.BillCountry(@shipment['billing_address']['country'])
+            xml.BillPhone(@shipment['billing_address']['phone'])
+
+
             xml.Email(@shipment['email'])
             xml.Code(@shipment['shipping_method_code'])
 
@@ -62,11 +97,9 @@ module Documents
     end
 
     private
-    def truncate_name
-      name = @shipment['shipping_address']['firstname']
-
-      if name.length > 15
-        name.slice 0..15
+    def truncate_name(name)
+      if name.length > 11
+        name.slice 0..11
       else
         name
       end
@@ -81,9 +114,7 @@ module Documents
       end
     end
 
-    def truncate_city
-      city = @shipment['shipping_address']['city']
-
+    def truncate_city(city)
       if city.length > 12
         city.slice 0..12
       else
@@ -91,9 +122,15 @@ module Documents
       end
     end
 
-    def ship_state
-      state = @shipment['shipping_address']['state']
+    def truncate_address(address)
+      if address.length > 30
+        address.slice 0..30
+      else
+        address
+      end
+    end
 
+    def ship_state(state)
       case state
       when 'U.S. Armed Forces – Americas'
         'AA'
