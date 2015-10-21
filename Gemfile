@@ -34,4 +34,4 @@ gem 'rake'
 
 gem 'capistrano'
 gem 'capistrano-bundler'
-gem 'capistrano-rvm'
+gem 'rvm1-capistrano3', require: false

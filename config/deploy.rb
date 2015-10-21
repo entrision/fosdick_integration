@@ -1,6 +1,6 @@
 lock '3.4.0'
 
-set :rvm_ruby_version, '2.2.1@nourish'
+set :rvm1_ruby_version, '2.2.1@nourish'
 
 set :format, :pretty
 set :log_level, :debug
@@ -21,14 +21,20 @@ set :unicorn_pid, "#{shared_path}/pids/unicorn.pid"
 
 namespace :deploy do
   task :restart do
-    run "if [ -f #{unicorn_pid} ]; then kill -USR2 `cat #{unicorn_pid}`; else cd #{current_path} && bundle exec unicorn -c #{unicorn_conf} -E #{rack_env} -D; fi"
+    on roles(:web) do
+      execute "if [ -f #{fetch(:unicorn_pid)} ]; then kill -USR2 `cat #{fetch(:unicorn_pid)}`; else cd #{current_path} && bundle exec unicorn -c #{fetch(:unicorn_conf)} -E #{fetch(:rack_env)} -D; fi"
+    end
   end
 
   task :start do
-    run "cd #{current_path} && bundle exec unicorn -c #{unicorn_conf} -E #{rack_env} -D"
+    on roles(:web) do
+      execute "cd #{current_path} && bundle exec unicorn -c #{fetch(:unicorn_conf)} -E #{fetch(:rack_env)} -D"
+    end
   end
 
   task :stop do
-    run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+    on roles(:web) do
+      execute "if [ -f #{fetch(:unicorn_pid)} ]; then kill -QUIT `cat #{fetch(:unicorn_pid)}`; fi"
+    end
   end
 end
