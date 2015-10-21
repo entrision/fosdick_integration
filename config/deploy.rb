@@ -21,20 +21,22 @@ set :unicorn_pid, "#{shared_path}/pids/unicorn.pid"
 
 namespace :deploy do
   task :restart do
-    on roles(:web) do
-      execute "if [ -f #{fetch(:unicorn_pid)} ]; then kill -USR2 `cat #{fetch(:unicorn_pid)}`; else cd #{current_path} && bundle exec unicorn -c #{fetch(:unicorn_conf)} -E #{fetch(:rack_env)} -D; fi"
+    on roles(:app) do
+      execute "if [ -f #{fetch(:unicorn_pid)} ]; then kill -USR2 `cat #{fetch(:unicorn_pid)}`; else sudo start nourish; fi"
     end
   end
 
   task :start do
-    on roles(:web) do
-      execute "cd #{current_path} && bundle exec unicorn -c #{fetch(:unicorn_conf)} -E #{fetch(:rack_env)} -D"
+    on roles(:app) do
+      execute "if [ ! -f #{fetch(:unicorn_pid)} ]; sudo start nourish; fi"
     end
   end
 
   task :stop do
-    on roles(:web) do
-      execute "if [ -f #{fetch(:unicorn_pid)} ]; then kill -QUIT `cat #{fetch(:unicorn_pid)}`; fi"
+    on roles(:app) do
+      execute "sudo stop nourish"
     end
   end
+
+  after :publishing, :restart
 end
