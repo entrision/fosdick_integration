@@ -28,7 +28,7 @@ namespace :deploy do
 
   task :start do
     on roles(:app) do
-      execute "if [ ! -f #{fetch(:unicorn_pid)} ]; sudo start nourish; fi"
+      execute "if [ ! -f #{fetch(:unicorn_pid)} ]; then sudo start nourish; fi"
     end
   end
 
