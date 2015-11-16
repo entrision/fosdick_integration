@@ -16,7 +16,16 @@ module Documents
             xml.Subtotal(0)
             xml.Total(0)
             xml.ExternalID("#{@shipment['id']}")
-            xml.AdCode(@shipment['adcode'] || @config['adcode'])
+
+            if (@shipment['has_gift_message'].present? && @shipment['has_gift_message'])
+              xml.AdCode('NOURCARD')
+              xml.Custom_Gift_To( @shipment['gift_to'] )
+              xml.Custom_Gift_From( @shipment['gift_from'] )
+              xml.Custom_Gift_Message( @shipment['gift_message'] )
+            else
+              xml.AdCode(@shipment['adcode'] || @config['adcode'])
+            end
+
             xml.Prepaid('Y')
             xml.ShipFirstname(truncate_name( @shipment['shipping_address']['firstname']) )
             xml.ShipLastname(truncate_name( @shipment['shipping_address']['lastname']) )
