@@ -97,6 +97,14 @@ module Documents
                   xml.PricePer 0
                 }
               end
+
+              if (@shipment['has_gift_message'].present? && @shipment['has_gift_message'])
+                xml.Item {
+                  xml.Inv 'MKTGNCC'
+                  xml.Qty 1
+                  xml.PricePer 0
+                }
+              end
             }
           }
         }
